@@ -1,0 +1,67 @@
+(1) What is the value of argv?
+	argv is a pointer to a pointer in memory (0x7fffffffe608).
+
+(2) What is pointed to by argv?
+	Each entry in argv points to the start of a string. In the case of argv[0]
+	(0x7fffffffe836), the string gives the path to the program wc. Also, argv[1]
+	(0x7fffffffe859) gives the input filename passed in (“tests/yo.txt”)
+
+(3) What is the address of the function main?
+	0x4006dd
+
+(4) Try 'info stack'. Explain what you see.
+	#0  readFile (filename=0x7fffffffe859 "tests/yo.txt", fromStdIn=0) at wc.c:69
+	#1  0x000000000040073a in main (argc=2, argv=0x7fffffffe608) at wc.c:30
+	- Seems to give the order of the functions in progress, as well as the pointer
+	  to the current instruction in functions further back in the stack.
+
+(5) Try 'info frame'. Explain what you see.
+	Stack level 0, frame at 0x7fffffffe4f0:
+ 	rip = 0x40085c in readFile (wc.c:67); saved rip = 0x40073a
+	 called by frame at 0x7fffffffe530
+	 source language c.
+	 Arglist at 0x7fffffffe4e0, args: filename=0x7fffffffe859 "tests/yo.txt", fromStdIn=0
+	 Locals at 0x7fffffffe4e0, Previous frame's sp is 0x7fffffffe4f0
+	 Saved registers:
+	  rbp at 0x7fffffffe4e0, rip at 0x7fffffffe4e8
+	- Gives the stack level of the frame currently executing. In this case, we’re in
+	  readFile() (ln 67). 
+	- Saved rip is the pointer to the call to readFile() in main().
+	- Arglist is the arguments passed in to readFile()
+
+(6) Try 'info registers'. Which registers are holding aspects of the program that you recognize?
+    NOTE: See <https://en.wikipedia.org/wiki/X86#x86_registers> for more info on x86 registers
+          In the book, registers are listed with ‘e’ (i.e. ‘eax’, ‘ebx’, ...)=> 32-bit arch.
+          Since I’m running on a 64-bit arch, the registers are listed with an ‘r’.
+	rax            0x20	32					-> General-purpose register (GPR) (64-bit)
+	rbx            0x0	0					-> GPR (64-bit)
+									-> Can be used as address reg & array index
+	rcx            0x7ffff7b00810	140737348896784			-> GPR (64-bit)
+									-> Can be used as counter in loop
+	rdx            0x20	32					-> GPR (64-bit)
+
+	rsi            0x6020f0	6299888				-> Address register (64-bit)
+	rdi            0x602010	6299664				-> Address register (64-bit)
+
+	rbp            0x7fffffffe4e0	0x7fffffffe4e0			-> Base pointer (offset from stack segment) (64-bit)
+									-> Somewhere else in stack, usu. base of current frame
+	rsp            0x7fffffffe4b0	0x7fffffffe4b0			-> Stack pointer (offset from stack segment) (64-bit)
+									-> Top of stack
+
+	r8             0x7ffff7feb740	140737354053440			-> Add’l GPR (added for 64-bit)
+	r9             0x0	0					-> Add’l GPR (added for 64-bit)
+	r10            0x22	34					-> Add’l GPR (added for 64-bit)
+	r11            0x246	582					-> Add’l GPR (added for 64-bit)
+	r12            0x4005f0	4195824				-> Add’l GPR (added for 64-bit)
+	r13            0x7fffffffe600	140737488348672			-> Add’l GPR (added for 64-bit)
+	r14            0x0	0					-> Add’l GPR (added for 64-bit)
+	r15            0x0	0					-> Add’l GPR (added for 64-bit)
+
+	rip            0x4008cf	0x4008cf <readFile+158>	-> Instruction pointer (offset from code segment)
+	eflags         0x246	[ PF ZF IF ]				-> Execution Flags
+	cs             0x33	51					-> Code segment register
+	ss             0x2b	43					-> Stack segment register
+	ds             0x0	0					-> Data segment register
+	es             0x0	0					-> “Extra” segment register
+	fs             0x0	0					-> Add’l segment register (added for 32-bit)
+	gs             0x0	0					-> Add’l segment register (added for 32-bit)
