@@ -1,16 +1,46 @@
+NOTE: Should review ELF file format for more info
+<https://en.wikipedia.org/wiki/Executable_and_Linkable_Format>
+<http://people.redhat.com/mpolacek/src/devconf2012.pdf>
+<http://stackoverflow.com/questions/9226088/how-are-the-different-segments-like-heap-stack-text-related-to-the-physical-me> (for #4)
+
 (1) What file format is used for this binary? And what architecture is it compiled for?
 	File format: elf64-x86-64 (ELF -> Executable and Linkable Format)
 	Architecture: i386:x86-64
 
 (2) What are some of the names of segment/sections you find?
 	- Program Header	-> Shows segments used at Runtime
-	- Dynamic Section
-	- Version References
+		- PHDR		-> Segment table (THIS THING!!)
+		- INTERP	-> Path to dynamic linker
+		- LOAD		-> Loadable entry in segment table
+		- LOAD		-> Can have more than one, one of which will
+				   be executable and contain the code
+		- DYNAMIC	-> Dynamic linking information
+		- NOTE		-> OS/ABI requirements (i.e. min kernel ver)
+		- EH_FRAME	-> Exception handler frame
+		- STACK		-> Whether we need an executable stack
+		- RELRO		-> Which part of memory should be read-only
+				   after applying dynamic relocations
+
 	- Sections		-> Lists set of sections of the binary
+		- .interp	-> 
+		- .init		-> Initialization code which calls main()
+		- .fini		-> Code which executes on successful main() exit
+		- .plt		-> “Procedure Linking Table”
+		- .rodata	-> Read-only data
+		- .data		-> 
+		- .bss		-> “Block Started by Symbol” - uninitialized vars
+		- .text		-> Stores the executable code
 
 (3) What segment/section contains main (the function) and what is the address of main? (should be same as seen in GDB)
 	“Disassembly of section .text:”
 	Main is at 0x4006dd (same as in GDB)
 
 (4) Do you see the stack segment anywhere? What about the heap? Explain.
-	Stack is in Program Header
+	Neither are explicitly called out, as the ELF file only specifies how
+	the kernel should load the program into a process. The kernel will
+	allocate memory for both the stack and the heap at load-time, and the
+	size of both will be determined by the kernel.
+
+	That said, the Program Header does call out a “STACK” segment, 
+	although this segment has zero size, as the stack is zero until the
+	process starts and the first stack frame is created.
